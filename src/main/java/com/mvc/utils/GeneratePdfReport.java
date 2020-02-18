@@ -1,0 +1,69 @@
+package com.mvc.utils;
+
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
+
+import com.mvc.entities.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.Iterator;
+import java.util.List;
+
+public class GeneratePdfReport {
+
+        private static final Logger logger = LoggerFactory.getLogger(GeneratePdfReport.class);
+
+        public static <T extends PdfReport> ByteArrayInputStream report(List<T> list, String header) {
+
+            Document document = new Document();
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+            try {
+
+                PdfPTable table = new PdfPTable(1);
+                table.setWidthPercentage(100);
+
+                Font headFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD);
+
+                PdfPCell hcell;
+                hcell = new PdfPCell(new Phrase(header, headFont));
+                hcell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                table.addCell(hcell);
+
+                Iterator<T> iterator = list.iterator();
+
+                while(iterator.hasNext()) {
+
+                    PdfPCell cell;
+
+                    T next = iterator.next();
+                    cell = new PdfPCell(new Phrase(next.toReportString()));
+                    cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                    cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+                    table.addCell(cell);
+                }
+
+                PdfWriter.getInstance(document, out);
+                document.open();
+                document.add(table);
+
+                document.close();
+
+            } catch (DocumentException ex) {
+
+                logger.error("Error occurred: {0}", ex);
+            }
+
+            return new ByteArrayInputStream(out.toByteArray());
+        }
+    }

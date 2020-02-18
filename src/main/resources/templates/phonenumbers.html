@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Getting Started: Serving Web Content</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+<div>
+    <h2 th:text="'Add phone number'"/><br/>
+    <form th:object="${phonenumber}" th:action="@{/phonenumbers}" method="post">
+        <table>
+            <tr><td>User </td>
+            <td><select th:type="users" th:field="*{user}" >
+                    <option th:each="user : ${users}"
+                            th:value="${user}"
+                            th:text="${user}">
+                    </option>
+                </select></td></tr>
+            <tr><td>Company </td>
+            <td><select th:field="*{phoneCompany}">
+                <option th:each="company : ${companies}"
+                        th:value="${company}"
+                        th:text="${company}">
+                </option>
+            </select></td></tr>
+            <tr><td>Number </td><td><input type="text" th:field="*{number}" /></td></tr>
+            <tr><td><input type="submit" value="Save" /></td></tr>
+        </table>
+    </form>
+</div>
+<div>
+    <ul>
+        <li th:each="number : ${numbers}">
+            <a th:text="${number}" />
+        </li>
+    </ul>
+</div>
+</body>
+</html>
