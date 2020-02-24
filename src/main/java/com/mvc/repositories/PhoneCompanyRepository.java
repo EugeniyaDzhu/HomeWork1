@@ -1,11 +1,11 @@
 package com.mvc.repositories;
 
-import com.mvc.entities.PhoneCompany;
-import com.mvc.entities.User;
+import java.util.List;
+
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import com.mvc.entities.PhoneCompany;
 
 @Repository
 public interface PhoneCompanyRepository  extends CrudRepository<PhoneCompany, Long> {
@@ -13,5 +13,7 @@ public interface PhoneCompanyRepository  extends CrudRepository<PhoneCompany, Lo
     List<PhoneCompany> findByName(String name);
 
     PhoneCompany findFirstByName(String name);
+
+    List<PhoneCompany> findAll();
 
 }

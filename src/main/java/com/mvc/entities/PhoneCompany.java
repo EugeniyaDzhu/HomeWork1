@@ -1,6 +1,6 @@
 package com.mvc.entities;
 
-import com.mvc.utils.PdfReport;
+import java.io.Serializable;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -8,7 +8,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Entity
-public class PhoneCompany implements PdfReport {
+public class PhoneCompany implements Serializable {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
@@ -34,11 +34,6 @@ public class PhoneCompany implements PdfReport {
         return String.format(
                 "Phone company[id=%d, name='%s']",
                 id, name);
-    }
-
-    @Override
-    public String toReportString() {
-        return name;
     }
 }
 

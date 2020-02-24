@@ -1,21 +1,21 @@
 package com.mvc.services;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.mvc.entities.User;
-import com.mvc.repositories.UserRepository;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.mvc.NotFoundException;
+import com.mvc.entities.User;
+import com.mvc.models.UserModel;
+import com.mvc.repositories.UserRepository;
+import com.mvc.utils.ParseService;
 
 @Service
 public class UserService {
@@ -27,37 +27,42 @@ public class UserService {
         this.repository = repository;
     }
 
-    public User add(User user) {
-        return repository.save(user);
+    public void add(UserModel user) {
+        repository.save(new User(user.getFirstName(), user.getLastName()));
     }
 
-    public List<User> findByLastName(String lastName) {
-        return repository.findByLastName(lastName);
+    public UserModel findById(Long id) {
+        User user = repository.findById(id).orElseThrow(() -> new NotFoundException("No user with id"));
+        return new UserModel(user);
     }
 
-    public List<User> findAll() {
-        return (List<User>) repository.findAll();
+    public List<UserModel> findByLastName(String lastName) {
+        return repository.findByLastName(lastName).stream()
+                .map(user -> new UserModel(user))
+                .collect(Collectors.toList());
+    }
+
+    public Map<Long, UserModel> findAll() {
+        return repository.findAll().stream()
+                .collect(Collectors.toMap(user -> user.getId(), user -> new UserModel(user)));
     }
 
     @Transactional
-    public void saveAll(List<User> users) {
-        repository.saveAll(users);
+    public void saveAll(List<UserModel> users) {
+        repository.saveAll(users.stream()
+                .map(user -> new User(user.getFirstName(), user.getLastName()))
+                .collect(Collectors.toList()));
     }
 
-    public List<User> parseUsersFromFile(MultipartFile multipartFile) throws Exception {
-        File tempFile = File.createTempFile("D:/WorkingDirectory/temp", multipartFile.getOriginalFilename());
-        tempFile.deleteOnExit();
-        multipartFile.transferTo(tempFile);
-        List<User> users = Files.lines(Paths.get(tempFile.getAbsoluteFile().toString()), StandardCharsets.UTF_8)
-                .map(this::toUser).collect(Collectors.toList());
-        tempFile.delete();
+    public List<UserModel> parseUsersFromFile(MultipartFile multipartFile){
+        List<UserModel> users = ParseService.parseUsersFromFile(multipartFile, this::toUser);
         return users;
     }
 
-    private User toUser(String jsonText ) {
+    private UserModel toUser(String jsonText ) {
         GsonBuilder builder = new GsonBuilder();
         Gson gson = builder.create();
-        User user = gson.fromJson(jsonText, User.class);
+        UserModel user = gson.fromJson(jsonText, UserModel.class);
         return user;
     }
 }

@@ -7,20 +7,20 @@
 <body>
 <div>
     <h2 th:text="'Add phone number'"/><br/>
-    <form th:object="${phonenumber}" th:action="@{/phonenumbers}" method="post">
+    <form th:object="${phonenumber}" th:action="@{/phonenumbers}" method="post" enctype="multipart/form-data">
         <table>
             <tr><td>User </td>
-            <td><select th:type="users" th:field="*{user}" >
-                    <option th:each="user : ${users}"
-                            th:value="${user}"
-                            th:text="${user}">
+            <td><select th:type="usermodel" th:field="*{user}" >
+                    <option th:each="user : ${users.entrySet()}"
+                            th:value="${user.key}"
+                            th:text="${user.value}">
                     </option>
                 </select></td></tr>
             <tr><td>Company </td>
-            <td><select th:field="*{phoneCompany}">
-                <option th:each="company : ${companies}"
-                        th:value="${company}"
-                        th:text="${company}">
+            <td><select th:type="phonecompanymodel"th:field="*{phoneCompany}">
+                <option th:each="company : ${companies.entrySet()}"
+                        th:value="${company.key}"
+                        th:text="${company.value}">
                 </option>
             </select></td></tr>
             <tr><td>Number </td><td><input type="text" th:field="*{number}" /></td></tr>
@@ -35,5 +35,8 @@
         </li>
     </ul>
 </div>
-</body>
+<br/>
+<a th:href="@{/phonenumbers/pdfreport}"> Pdf report </a></body>
+<br/>
+<a th:href="@{/phonenumbers/upload}"> upload </a></body>
 </html>

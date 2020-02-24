@@ -1,11 +1,15 @@
 package com.mvc.entities;
 
-import com.mvc.utils.PdfReport;
+import java.io.Serializable;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
 @Entity
-public class PhoneNumber implements PdfReport {
+public class PhoneNumber implements Serializable {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
@@ -59,13 +63,6 @@ public class PhoneNumber implements PdfReport {
         return String.format(
                 "Phone number[id=%d, user='%s', phone company='%s', number='%s']",
                 id, user, phoneCompany, number);
-    }
-
-    @Override
-    public String toReportString() {
-        return String.format(
-                "User: '%s', Phone company: '%s', number - '%s'",
-                user.toReportString(), phoneCompany.toReportString(), number);
     }
 }
 

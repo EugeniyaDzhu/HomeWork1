@@ -1,13 +1,15 @@
 package com.mvc.repositories;
 
-import com.mvc.entities.PhoneNumber;
-import com.mvc.entities.User;
+import java.util.List;
+
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import com.mvc.entities.PhoneNumber;
 
 @Repository
 public interface PhoneNumberRepository extends CrudRepository<PhoneNumber, Long> {
+
+    List<PhoneNumber> findAll();
 
 }

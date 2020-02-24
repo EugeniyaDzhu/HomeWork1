@@ -1,10 +1,9 @@
 package com.mvc.models;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import com.mvc.entities.PhoneCompany;
+import com.mvc.utils.PdfReport;
 
-public class PhoneCompanyModel {
+public class PhoneCompanyModel implements PdfReport {
 
     private String name;
 
@@ -13,6 +12,10 @@ public class PhoneCompanyModel {
 
     public PhoneCompanyModel(String name) {
         this.name = name;
+    }
+
+    public PhoneCompanyModel(PhoneCompany entity) {
+        this.name = entity.getName();
     }
 
     @Override
@@ -28,5 +31,10 @@ public class PhoneCompanyModel {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public String toReportString() {
+        return name;
     }
 }

@@ -1,33 +1,32 @@
 package com.mvc.controllers;
 
-import com.mvc.NotFoundException;
-import com.mvc.entities.PhoneCompany;
-import com.mvc.entities.PhoneNumber;
-import com.mvc.entities.User;
-import com.mvc.models.PhoneNumberModel;
-import com.mvc.repositories.PhoneNumberRepository;
-import com.mvc.services.PhoneCompanyService;
-import com.mvc.services.PhoneNumberService;
-import com.mvc.services.UserService;
-import com.mvc.utils.GeneratePdfReport;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpRequest;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.HttpRequestHandler;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.mvc.NotFoundException;
+import com.mvc.models.PhoneNumberModel;
+import com.mvc.services.PhoneCompanyService;
+import com.mvc.services.PhoneNumberService;
+import com.mvc.services.UserService;
+import com.mvc.utils.GeneratePdfReport;
 
 @Controller
 @RequestMapping("/phonenumbers")
@@ -49,17 +48,20 @@ public class PhoneNumberController {
         return "phonenumbers";
     }
 
-    @PostMapping()
-    public String addPhoneNumbers(@RequestParam("user") String user,
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public String addPhoneNumbers(@RequestParam("user") Long userId,
+                                  @RequestParam("phoneCompany") Long phoneCompanyId,
+                                  @RequestParam("number") String number,
                                   Model model) {
-        model.addAttribute("numbers", phoneNumberService.findAll());
-        return "phonenumbers";
+        phoneNumberService.saveByIds(userId, phoneCompanyId, number);
+        return "redirect:/phonenumbers";
     }
 
     @GetMapping("/upload")
     public String listUploadedFiles(Model model) throws IOException {
 
         model.addAttribute("path", "/phonenumbers/upload");
+        model.addAttribute("pdfpath", "/phonenumbers/pdfreport");
         return "uploadForm";
     }
 
@@ -67,7 +69,7 @@ public class PhoneNumberController {
     public String handleFileUpload(@RequestParam("file") MultipartFile file,
                                    RedirectAttributes redirectAttributes) {
 
-        List<PhoneNumber> phoneNumbers = Collections.emptyList();
+        List<PhoneNumberModel> phoneNumbers = Collections.emptyList();
         try {
             phoneNumbers = phoneNumberService.parsePhoneNumbersFromFile(file);
         } catch (Exception e) {
@@ -85,9 +87,9 @@ public class PhoneNumberController {
     @GetMapping(value = "/pdfreport", produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<InputStreamResource> citiesReport() {
 
-        List<PhoneNumber> phoneNumbers = phoneNumberService.findAll();
+        Map<Long, PhoneNumberModel> phoneNumbers = phoneNumberService.findAll();
 
-        ByteArrayInputStream bis = GeneratePdfReport.report(phoneNumbers, "Phone numbers");
+        ByteArrayInputStream bis = GeneratePdfReport.report(phoneNumbers.values(), "Phone numbers");
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Disposition", "inline; filename=citiesreport.pdf");

@@ -1,20 +1,20 @@
 package com.mvc.services;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.mvc.entities.PhoneCompany;
-import com.mvc.repositories.PhoneCompanyRepository;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.mvc.entities.PhoneCompany;
+import com.mvc.models.PhoneCompanyModel;
+import com.mvc.repositories.PhoneCompanyRepository;
+import com.mvc.utils.ParseService;
 
 @Service
 public class PhoneCompanyService {
@@ -26,37 +26,38 @@ public class PhoneCompanyService {
         this.repository = repository;
     }
 
-    public List<PhoneCompany> findByName(String name) {
-        return repository.findByName(name);
+    public List<PhoneCompanyModel> findByName(String name) {
+        return repository.findByName(name).stream()
+                .map(phoneCompany -> new PhoneCompanyModel(phoneCompany))
+                .collect(Collectors.toList());
     }
 
-    public List<PhoneCompany> findAll() {
-        return (List<PhoneCompany>) repository.findAll();
+    public Map<Long, PhoneCompanyModel> findAll() {
+        return repository.findAll().stream()
+                .collect(Collectors.toMap(phoneCompany -> phoneCompany.getId(),
+                        phoneCompany -> new PhoneCompanyModel(phoneCompany)));
     }
 
-    public PhoneCompany add(PhoneCompany phoneCompany) {
-        return repository.save(phoneCompany);
+    public void add(PhoneCompanyModel phoneCompany) {
+        repository.save(new PhoneCompany(phoneCompany.getName()));
     }
 
     @Transactional
-    public void saveAll(List<PhoneCompany> phoneCompanies) {
-        repository.saveAll(phoneCompanies);
+    public void saveAll(List<PhoneCompanyModel> phoneCompanies) {
+        repository.saveAll(phoneCompanies.stream()
+                .map(phoneCompanyModel -> new PhoneCompany(phoneCompanyModel.getName()))
+                .collect(Collectors.toList()));
     }
 
-    public List<PhoneCompany> parsePhoneCompaniesFromFile(MultipartFile multipartFile) throws Exception {
-        File tempFile = File.createTempFile("D:/WorkingDirectory/temp", multipartFile.getOriginalFilename());
-        tempFile.deleteOnExit();
-        multipartFile.transferTo(tempFile);
-        List<PhoneCompany> phoneCompanies = Files.lines(Paths.get(tempFile.getAbsoluteFile().toString()), StandardCharsets.UTF_8)
-                .map(this::toPhoneCompany).collect(Collectors.toList());
-        tempFile.delete();
+    public List<PhoneCompanyModel> parsePhoneCompaniesFromFile(MultipartFile multipartFile) throws Exception {
+        List<PhoneCompanyModel> phoneCompanies = ParseService.parseUsersFromFile(multipartFile, this::toPhoneCompany);;
         return phoneCompanies;
     }
 
-    private PhoneCompany toPhoneCompany(String jsonText ) {
+    private PhoneCompanyModel toPhoneCompany(String jsonText ) {
         GsonBuilder builder = new GsonBuilder();
         Gson gson = builder.create();
-        PhoneCompany phoneCompany = gson.fromJson(jsonText, PhoneCompany.class);
+        PhoneCompanyModel phoneCompany = gson.fromJson(jsonText, PhoneCompanyModel.class);
         return phoneCompany;
     }
 }

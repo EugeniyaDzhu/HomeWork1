@@ -1,5 +1,13 @@
 package com.mvc.utils;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.Collection;
+import java.util.Iterator;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
@@ -10,20 +18,11 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
-import com.mvc.entities.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.util.Iterator;
-import java.util.List;
-
 public class GeneratePdfReport {
 
         private static final Logger logger = LoggerFactory.getLogger(GeneratePdfReport.class);
 
-        public static <T extends PdfReport> ByteArrayInputStream report(List<T> list, String header) {
+        public static <T extends PdfReport> ByteArrayInputStream report(Collection<T> collection, String header) {
 
             Document document = new Document();
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -40,7 +39,7 @@ public class GeneratePdfReport {
                 hcell.setHorizontalAlignment(Element.ALIGN_CENTER);
                 table.addCell(hcell);
 
-                Iterator<T> iterator = list.iterator();
+                Iterator<T> iterator = collection.iterator();
 
                 while(iterator.hasNext()) {
 
