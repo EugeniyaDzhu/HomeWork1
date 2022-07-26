@@ -6,6 +6,7 @@ import com.mvc.utils.PdfReport;
 public class UserModel implements PdfReport {
     private String firstName;
     private String lastName;
+    private String comment;
 
     protected UserModel() {}
 
@@ -41,6 +42,14 @@ public class UserModel implements PdfReport {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
     @Override
