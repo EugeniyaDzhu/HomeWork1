@@ -6,7 +6,7 @@ import com.mvc.utils.PdfReport;
 public class UserModel implements PdfReport {
     private String firstName;
     private String lastName;
-    private String comment;
+    private String comment; //comment
 
     protected UserModel() {}
 
